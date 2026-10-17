@@ -11,8 +11,9 @@ Only the latest release receives security fixes.
 
 ## Reporting a Vulnerability
 
-Email: support@kwtsms.com
+Support: https://www.kwtsms.com/support.html
 <!-- 2026-10-17 07:24 +03: contact switched to the published support address (task 344). -->
+<!-- 2026-10-18 01:10 +03: direct contact replaced with the support page link (task 344). -->
 
 Please do not open a public GitHub issue for security vulnerabilities.
 
