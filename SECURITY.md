@@ -11,7 +11,8 @@ Only the latest release receives security fixes.
 
 ## Reporting a Vulnerability
 
-Email: mo@boxlink.net
+Email: support@kwtsms.com
+<!-- 2026-10-17 07:24 +03: contact switched to the published support address (task 344). -->
 
 Please do not open a public GitHub issue for security vulnerabilities.
 
