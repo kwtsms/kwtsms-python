@@ -47,7 +47,8 @@ _API_ERRORS: dict = {
     "ERR025": "Invalid phone number. Make sure the number includes the country code (e.g., 96598765432 for Kuwait, not 98765432).",
     "ERR026": "This country is not activated on your account. Contact kwtSMS support to enable the destination country.",
     "ERR027": "HTML tags are not allowed in the message. Remove any HTML content and try again.",
-    "ERR028": "You must wait at least 15 seconds before sending to the same number again. No credits were consumed.",
+    # 2026-10-22 15:33 +03: ERR028 text corrected, the window is opt-in and per account (10 s default), never a fixed 15 s.
+    "ERR028": "Sent to the same number too soon. Duplicate SMS protection is on for this account, so the whole request was rejected and nothing was charged. Wait for the account's window (10 seconds by default) before resending.",
     "ERR029": "Message ID does not exist or is incorrect.",
     "ERR030": "Message is stuck in the send queue with an error. Delete it at kwtsms.com → Queue to recover credits.",
     "ERR031": "Message rejected: bad language detected.",
@@ -976,27 +977,36 @@ class KwtSMS:
         mobile: Union[str, List[str]],
         message: str,
         sender: Optional[str] = None,
-        max_retries: int = 3,
+        max_retries: int = 0,
+        wait_seconds: float = 10,
     ) -> dict:
         """
-        Send SMS, retrying automatically on ERR028 (rate limit: wait 15 seconds).
+        Send SMS, optionally retrying on ERR028 (duplicate SMS protection).
 
-        Waits 16 seconds between retries (15 seconds required by API, plus 1 second buffer).
-        All other errors are returned immediately without retry.
+        ERR028 is opt-in per account (Duplicate SMS protection in the account's
+        API settings). When it is on and any number in the request was sent the
+        same message within the account's window (10 seconds by default,
+        configurable per account), the whole request is rejected and nothing is
+        charged. Retry is off by default: ERR028 is returned to the caller like
+        any other error unless max_retries > 0. Set wait_seconds to your
+        account's window. All other errors are returned immediately.
 
         Args:
-            mobile:      phone number(s) to send to
-            message:     message text
-            sender:      Sender ID override (uses default if not given)
-            max_retries: maximum number of ERR028 retries after the first attempt (default 3, so up to 4 total calls)
+            mobile:       phone number(s) to send to
+            message:      message text
+            sender:       Sender ID override (uses default if not given)
+            max_retries:  ERR028 retries after the first attempt (default 0, no retry)
+            wait_seconds: seconds to wait before each retry (default 10, the API default window)
 
         Returns:
             Same dict shape as send(). Never raises.
         """
+        # 2026-10-22 15:33 +03: retry off by default and wait is a parameter (default 10), was a
+        # hardcoded 3 retries x 16 s. ERR028 is opt-in with a per-account window, not a fixed 15 s.
         result = self.send(mobile, message, sender=sender)
         retries = 0
         while result.get("code") == "ERR028" and retries < max_retries:
-            time.sleep(16)
+            time.sleep(wait_seconds)
             result = self.send(mobile, message, sender=sender)
             retries += 1
         return result

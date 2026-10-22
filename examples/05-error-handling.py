@@ -153,7 +153,8 @@ ERROR_ACTIONS = {
 
     # Transient errors: retry
     "ERR013": "retry_with_backoff",   # queue full (handled automatically in bulk mode)
-    "ERR028": "wait_15_seconds",      # too fast
+    # 2026-10-22 15:33 +03: ERR028 window is opt-in and per account (10 s default), not a fixed 15 s.
+    "ERR028": "wait_duplicate_window",  # sent to the same number too soon
 
     # Balance errors: recharge
     "ERR010": "recharge_credits",

@@ -86,7 +86,7 @@ the same name, which harms deliverability and brand recognition.
 | `ERR007` | Too many numbers (> 200) | Use `send()` with a list: it batches automatically |
 | `ERR025` | Invalid phone number | Check number format includes country code |
 | `ERR026` | Country not activated | Contact kwtSMS support to enable the destination country |
-| `ERR028` | Too fast (< 15s since last send to this number) | Wait 15 seconds |
+| `ERR028` | Sent to the same number too soon. | Duplicate SMS protection is opt-in per account. Wait for the account's window (10 seconds by default) |
 
 ### Message
 

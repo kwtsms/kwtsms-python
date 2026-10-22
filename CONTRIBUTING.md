@@ -51,8 +51,9 @@ Integration tests are skipped automatically if no credentials are found.
 | `uv run pytest tests/ -v` | All tests |
 | `uv run pytest tests/test_phone.py -v` | Phone normalization only |
 
-All tests use `test_mode=True`. No real SMS messages are sent and no credits
-are consumed.
+All tests use `test_mode=True`. No real SMS messages are delivered. Test messages
+are queued and their credits are held until you delete them from the Sending Queue
+in your kwtsms.com account.
 
 ### Test structure
 

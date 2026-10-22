@@ -183,15 +183,17 @@ class TestIPNotWhitelisted:
 # ── Rate limit: send too fast (ERR028) ────────────────────────────────────────
 
 class TestSendTooFast:
-    """ERR028: sent to the same number within 15 seconds."""
+    """ERR028: sent to the same number within the account's duplicate window."""
 
-    def test_rate_limit_error_explains_15_second_rule(self):
+    # 2026-10-22 15:33 +03: assert the corrected text, the window is per account, not 15 s.
+    def test_rate_limit_error_explains_duplicate_rule(self):
         resp = {"result": "ERROR", "code": "ERR028", "description": "Too fast."}
         with patch("kwtsms._core._request", return_value=resp):
             result = _client().send("96598765432", "Test")
         assert result["result"] == "ERROR"
         assert "action" in result
-        assert "15 second" in result["action"]
+        assert "too soon" in result["action"]
+        assert "15 second" not in result["action"]
 
 
 # ── Sender ID banned (ERR008) ─────────────────────────────────────────────────

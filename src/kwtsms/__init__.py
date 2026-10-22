@@ -11,7 +11,7 @@ Quick start:
     report = sms.validate(["96598765432", "+96512345678"])
     balance = sms.balance()
     delivery = sms.status(result["msg-id"])                  # delivery report
-    result = sms.send_with_retry("96598765432", "Hello")     # auto-retry on ERR028
+    result = sms.send_with_retry("96598765432", "Hello", max_retries=1)  # opt-in ERR028 retry (2026-10-22 15:33 +03: retry now off by default)
     sms = AsyncKwtSMS.from_env()                     # async client (pip install kwtsms[async])
 
 Utility functions:

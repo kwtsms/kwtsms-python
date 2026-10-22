@@ -76,7 +76,7 @@ result = sms.send("96598765432", "👋🔥")
 | `ERR006` | No valid phone numbers | Include country code (96598765432, not 98765432) |
 | `ERR025` | Invalid phone number format | Check number format |
 | `ERR026` | Country not activated | Contact kwtSMS support to enable the country |
-| `ERR028` | Too fast (< 15s since last send to this number) | Wait 15 seconds |
+| `ERR028` | Sent to the same number too soon. | Duplicate SMS protection is opt-in per account. Wait for the account's window (10 seconds by default) |
 
 ### Category 6: Message errors
 

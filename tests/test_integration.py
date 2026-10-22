@@ -4,8 +4,9 @@ Real integration tests: hit the live kwtSMS API.
 Requirements:
     kwtsms/.env must exist with valid KWTSMS_USERNAME and KWTSMS_PASSWORD.
 
-All sends use test_mode=True: messages are queued but never delivered,
-no credits are consumed.
+All sends use test_mode=True: messages are queued but never delivered.
+Their credits are held until you delete them from the Sending Queue in your
+kwtsms.com account (2026-10-22 15:33 +03: corrected, test sends hold credits).
 
 Run:
     uv run pytest tests/test_integration.py -v

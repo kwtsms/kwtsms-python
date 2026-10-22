@@ -339,13 +339,13 @@ Returns OK or ERROR dict. Never raises. Common error codes: ERR019 (no reports y
 
 ---
 
-### `send_with_retry(mobile, message, sender=None, max_retries=3)` → `dict`
+### `send_with_retry(mobile, message, sender=None, max_retries=0, wait_seconds=10)` → `dict`
 
-Send SMS with automatic ERR028 retry. ERR028 means "wait 15 seconds before resending to this number." This method sleeps 16 seconds and retries automatically, up to `max_retries` times (default 3, so up to 4 total calls).
+Send SMS with optional ERR028 retry. ERR028 comes from Duplicate SMS protection, which is opt-in per account (in the account's API settings). When it is on and any number in the request was sent the same message within the account's window (10 seconds by default, configurable per account), the whole request is rejected with ERR028 and nothing is charged. Retry is off by default (`max_retries=0`), so ERR028 is returned like any other error. Pass `max_retries` to retry, and set `wait_seconds` to your account's window.
 
 ```python
-result = sms.send_with_retry("96598765432", "Your OTP is: 123456")
-# if ERR028 occurs: waits 16s and retries, up to 3 times
+result = sms.send_with_retry("96598765432", "Your OTP is: 123456", max_retries=1, wait_seconds=10)
+# if ERR028 occurs: waits 10 s and retries once
 ```
 
 Non-ERR028 errors are returned immediately without retry. Never raises.
@@ -497,7 +497,7 @@ Common error codes:
 | `ERR011` | Insufficient balance |
 | `ERR025` | Invalid phone number, missing country code |
 | `ERR026` | Country not activated on this account |
-| `ERR028` | Must wait 15s before sending to the same number again |
+| `ERR028` | Sent to the same number too soon. |
 
 ---
 
@@ -519,7 +519,7 @@ Numbers must include the country code. `98765432` (local) will be rejected by th
 
 ## Test mode
 
-Set `KWTSMS_TEST_MODE=1` or `test_mode=True`. Messages are queued but **not delivered**, no credits consumed.
+Set `KWTSMS_TEST_MODE=1` or `test_mode=True`. Test messages are queued but **not delivered**. Their credits are held until you delete them from the Sending Queue in your kwtsms.com account.
 
 ```python
 sms = KwtSMS.from_env()   # KWTSMS_TEST_MODE=1 in .env
@@ -660,7 +660,7 @@ Check the **Sending Queue** at [kwtsms.com](https://www.kwtsms.com/login/). If y
 
 **2. What is the difference between Test mode and Live mode?**
 
-**Test mode** (`KWTSMS_TEST_MODE=1`) sends your message to the kwtSMS queue but does NOT deliver it to the handset. No SMS credits are consumed. Use this during development. **Live mode** (`KWTSMS_TEST_MODE=0`) delivers the message for real and deducts credits. Always develop in test mode and switch to live only when ready for production.
+**Test mode** (`KWTSMS_TEST_MODE=1`) sends your message to the kwtSMS queue but does NOT deliver it to the handset. Its credits are held until you delete it from the Sending Queue in your kwtsms.com account. Use this during development. **Live mode** (`KWTSMS_TEST_MODE=0`) delivers the message for real and deducts credits. Always develop in test mode and switch to live only when ready for production.
 
 **3. What is a Sender ID and why should I not use "KWT-SMS" in production?**
 

@@ -93,7 +93,9 @@ class AsyncKwtSMS:
             username:  kwtSMS API username
             password:  kwtSMS API password
             sender_id: default Sender ID shown on recipient's phone
-            test_mode: if True, sends are billed as test (no credits consumed)
+            test_mode: if True, messages are queued but not delivered; credits are held
+                       until you delete them from the Sending Queue
+                       (2026-10-22 15:33 +03: corrected, test sends do hold credits)
             log_file:  path to JSONL request log file, or "" to disable logging
         """
         if not username or not password:
