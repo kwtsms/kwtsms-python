@@ -71,4 +71,4 @@ Expected output: `Connected! Balance: X credits`
 
 ## CLI
 
-For a standalone cross-platform CLI, see [kwtsms-cli](https://github.com/boxlinknet/kwtsms-cli).
+For a standalone cross-platform CLI, see [kwtsms-cli](https://github.com/kwtsms/kwtsms-cli).
