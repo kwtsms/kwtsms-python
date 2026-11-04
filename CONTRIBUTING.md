@@ -15,7 +15,7 @@ Be respectful and constructive. Treat all contributors as professionals.
 ### 1. Clone and set up
 
 ```bash
-git clone https://github.com/boxlinknet/kwtsms-python.git
+git clone https://github.com/kwtsms/kwtsms-python.git
 cd kwtsms_python
 ```
 
@@ -75,7 +75,7 @@ tests/
 
 ## Reporting Bugs
 
-Open an issue at https://github.com/boxlinknet/kwtsms-python/issues with:
+Open an issue at https://github.com/kwtsms/kwtsms-python/issues with:
 
 1. Python version and OS
 2. Package version (`pip show kwtsms`)

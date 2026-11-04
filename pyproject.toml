@@ -27,9 +27,9 @@ async = ["aiohttp>=3.8"]
 
 [project.urls]
 Homepage      = "https://kwtsms.com"
-Repository    = "https://github.com/boxlinknet/kwtsms-python"
-Documentation = "https://github.com/boxlinknet/kwtsms-python/tree/master/examples"
-Changelog     = "https://github.com/boxlinknet/kwtsms-python/blob/master/CHANGELOG.md"
+Repository    = "https://github.com/kwtsms/kwtsms-python"
+Documentation = "https://github.com/kwtsms/kwtsms-python/tree/master/examples"
+Changelog     = "https://github.com/kwtsms/kwtsms-python/blob/master/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
