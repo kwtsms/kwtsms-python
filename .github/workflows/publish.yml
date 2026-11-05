@@ -20,6 +20,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 2026-11-05 14:15 +03: __version__ is sent in the User-Agent, so it and pyproject.toml must equal the tag (#939).
+      - name: Check version matches the tag
+        run: |
+          v=$(grep -oE '^__version__ = "[^"]+"' src/kwtsms/__init__.py | cut -d'"' -f2)
+          p=$(grep -oE '^version = "[^"]+"' pyproject.toml | cut -d'"' -f2)
+          [ "v$v" = "${GITHUB_REF_NAME}" ] && [ "v$p" = "${GITHUB_REF_NAME}" ] || { echo "::error::__version__ ($v) or pyproject version ($p) does not match tag ${GITHUB_REF_NAME}"; exit 1; }
+
       - name: Install uv
         run: pip install uv
 

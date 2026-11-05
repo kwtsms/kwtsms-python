@@ -167,6 +167,16 @@ sms = KwtSMS(
 
 **For production:** Use a secrets manager (AWS Secrets Manager, HashiCorp Vault, etc.) and pass credentials to the constructor.
 
+### User-Agent
+
+Every API request carries the User-Agent `kwtsms-python/<version>`: the library name and version only, no
+personal or customer data. Pass your own product token as `app_name` to put it in front (works for `AsyncKwtSMS` too):
+
+```python
+sms = KwtSMS("python_username", "python_password", app_name="my-shop/2.1.0")
+# User-Agent: my-shop/2.1.0 kwtsms-python/0.7.40
+```
+
 ---
 
 ## Methods

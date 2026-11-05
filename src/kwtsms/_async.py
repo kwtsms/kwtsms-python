@@ -21,6 +21,7 @@ from typing import List, Optional, Union
 
 from kwtsms._core import (
     BASE_URL,
+    _build_user_agent,  # 2026-11-05 14:14 +03: UA (#939)
     _enrich_error,
     _load_env_file,
     _write_log,
@@ -35,7 +36,9 @@ except ImportError:
     _aiohttp_available = False
 
 
-async def _async_request(endpoint: str, payload: dict, log_file: str = "") -> dict:
+# 2026-11-05 14:14 +03: user_agent parameter added, sent on every call (#939).
+async def _async_request(endpoint: str, payload: dict, log_file: str = "",
+                         user_agent: str = "") -> dict:
     """Async POST to a kwtSMS endpoint. Raises RuntimeError on network or JSON failure."""
     if not _aiohttp_available:
         raise RuntimeError(
@@ -53,7 +56,9 @@ async def _async_request(endpoint: str, payload: dict, log_file: str = "") -> di
     }
     try:
         async with aiohttp.ClientSession() as session:
+            # 2026-11-05 14:14 +03: User-Agent kwtsms-python/<version>, app token first when given (#939).
             async with session.post(url, json=payload,
+                                    headers={"User-Agent": user_agent or _build_user_agent()},
                                     timeout=aiohttp.ClientTimeout(total=15)) as resp:
                 text = await resp.text()
                 try:
@@ -85,7 +90,8 @@ class AsyncKwtSMS:
     """
 
     def __init__(self, username: str, password: str, sender_id: str = "KWT-SMS",
-                 test_mode: bool = False, log_file: str = "kwtsms.log"):
+                 test_mode: bool = False, log_file: str = "kwtsms.log",
+                 app_name: str = ""):  # 2026-11-05 14:14 +03: app_name for the User-Agent (#939)
         """
         Create an AsyncKwtSMS client.
 
@@ -97,9 +103,13 @@ class AsyncKwtSMS:
                        until you delete them from the Sending Queue
                        (2026-10-22 15:33 +03: corrected, test sends do hold credits)
             log_file:  path to JSONL request log file, or "" to disable logging
+            app_name:  optional product token of the calling app, e.g. "kwtsms-wordpress/3.5.2",
+                       sent before the library token in the User-Agent
         """
         if not username or not password:
             raise ValueError("username and password are required")
+        # 2026-11-05 14:14 +03: identify the caller to the API (name and version only, no personal data), #939.
+        self.user_agent = _build_user_agent(app_name)
         self.username   = username
         self.password   = password
         self.sender_id  = sender_id
@@ -153,7 +163,7 @@ class AsyncKwtSMS:
     async def verify(self) -> tuple:
         """Test credentials. Returns (ok: bool, balance: float | None, error: str | None)."""
         try:
-            data = await _async_request("balance", self._creds(), self.log_file)
+            data = await _async_request("balance", self._creds(), self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
             if data.get("result") == "OK":
                 self._cached_balance   = float(data.get("available", 0))
                 self._cached_purchased = float(data.get("purchased", 0))
@@ -218,7 +228,7 @@ class AsyncKwtSMS:
             "test":    "1" if self.test_mode else "0",
         }
         try:
-            result = await _async_request("send", payload, self.log_file)
+            result = await _async_request("send", payload, self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
         except RuntimeError as exc:
             return {"result": "ERROR", "code": "NETWORK", "description": str(exc),
                     "action": "Check your internet connection and try again."}
@@ -240,7 +250,8 @@ class AsyncKwtSMS:
         """
         try:
             data = await _async_request(
-                "report", {**self._creds(), "msgid": msg_id}, self.log_file
+                "report", {**self._creds(), "msgid": msg_id}, self.log_file,
+                user_agent=self.user_agent,  # 2026-11-05 14:14 +03: UA (#939)
             )
         except RuntimeError as exc:
             return {"result": "ERROR", "code": "NETWORK", "description": str(exc),

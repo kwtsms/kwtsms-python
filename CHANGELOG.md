@@ -9,6 +9,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+- The client sends a User-Agent `kwtsms-python/<version>` (name and version only, no personal data) so kwtSMS can see which integrations are in use. An optional `app_name` argument on `KwtSMS` and `AsyncKwtSMS` puts your app's token in front, e.g. `kwtsms-wordpress/3.5.2 kwtsms-python/0.7.40`. The final value is on `client.user_agent`.
+
 ### Changed
 - `send_with_retry()`: ERR028 retry is now off by default (`max_retries=0`), and the wait is a new `wait_seconds` parameter (default 10) instead of a hardcoded 16 seconds. Duplicate SMS protection (ERR028) is opt-in per account and its window is configurable per account (10 seconds by default); when on, the whole request is rejected and nothing is charged.
 - ERR028 action text no longer states a fixed 15 seconds.

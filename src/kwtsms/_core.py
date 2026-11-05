@@ -514,9 +514,28 @@ def _write_log(log_file: str, entry: dict) -> None:
         pass
 
 
+# ── User-Agent ────────────────────────────────────────────────────────────────
+
+def _build_user_agent(app_name: str = "") -> str:
+    """
+    Build the User-Agent "[app token ]kwtsms-python/<version>".
+
+    The app token is caller input: anything outside printable ASCII is removed
+    (CR/LF would split the header, non-ASCII cannot be encoded in it), spaces
+    become '-', leading/trailing '-' are trimmed, and it is cut to 64 characters.
+    2026-11-05 14:13 +03: added so kwtSMS can count accounts per integration, #939.
+    """
+    from kwtsms import __version__  # late import: kwtsms/__init__.py imports this module
+    app = re.sub(r"[^\x20-\x7e]+", "", app_name or "")
+    app = re.sub(r"\s+", "-", app.strip()).strip("-")[:64]
+    lib = "kwtsms-python/" + __version__
+    return f"{app} {lib}" if app else lib
+
+
 # ── HTTP request ──────────────────────────────────────────────────────────────
 
-def _request(endpoint: str, payload: dict, log_file: str = "") -> dict:
+# 2026-11-05 14:13 +03: user_agent parameter added, sent on every call (#939).
+def _request(endpoint: str, payload: dict, log_file: str = "", user_agent: str = "") -> dict:
     """
     POST to a kwtSMS REST/JSON API endpoint.
 
@@ -533,6 +552,8 @@ def _request(endpoint: str, payload: dict, log_file: str = "") -> dict:
         headers={
             "Content-Type": "application/json",
             "Accept": "application/json",
+            # 2026-11-05 14:13 +03: kwtsms-python/<version>, app token first when given (#939).
+            "User-Agent": user_agent or _build_user_agent(),
         },
         method="POST",
     )
@@ -614,6 +635,7 @@ class KwtSMS:
         sender_id: str = "KWT-SMS",
         test_mode: bool = False,
         log_file: str = "kwtsms.log",
+        app_name: str = "",
     ):
         """
         Args:
@@ -625,9 +647,14 @@ class KwtSMS:
             test_mode: When True, messages are queued but not delivered and no
                        credits are consumed. Safe for development. Default False.
             log_file:  Path to JSONL log file. Set to "" to disable logging.
+            app_name:  Optional product token of the calling app or plugin, e.g.
+                       "kwtsms-wordpress/3.5.2", sent before the library token
+                       in the User-Agent.
         """
         if not username or not password:
             raise ValueError("username and password are required")
+        # 2026-11-05 14:13 +03: identify the caller to the API (name and version only, no personal data), #939.
+        self.user_agent = _build_user_agent(app_name)
         self.username = username
         self.password = password
         self.sender_id = sender_id
@@ -703,7 +730,7 @@ class KwtSMS:
         e.g. "Authentication error... → Wrong API username or password. Check KWTSMS_..."
         """
         try:
-            data = _request("balance", self._creds(), self.log_file)
+            data = _request("balance", self._creds(), self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
             if data.get("result") == "OK":
                 self._cached_balance = float(data.get("available", 0))
                 self._cached_purchased = float(data.get("purchased", 0))
@@ -747,7 +774,7 @@ class KwtSMS:
             ERR022: Try again after 24 hours
         """
         try:
-            data = _request("report", {**self._creds(), "msgid": msg_id}, self.log_file)
+            data = _request("report", {**self._creds(), "msgid": msg_id}, self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
         except RuntimeError as e:
             return {"result": "ERROR", "code": "NETWORK", "description": str(e),
                     "action": "Check your internet connection and try again."}
@@ -772,7 +799,7 @@ class KwtSMS:
                 print(result["action"])
         """
         try:
-            data = _request("senderid", self._creds(), self.log_file)
+            data = _request("senderid", self._creds(), self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
         except RuntimeError as e:
             return {"result": "ERROR", "code": "NETWORK", "description": str(e),
                     "action": "Check your internet connection and try again."}
@@ -797,7 +824,7 @@ class KwtSMS:
                 print(result["action"])
         """
         try:
-            data = _request("coverage", self._creds(), self.log_file)
+            data = _request("coverage", self._creds(), self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
         except RuntimeError as e:
             return {"result": "ERROR", "code": "NETWORK", "description": str(e),
                     "action": "Check your internet connection and try again."}
@@ -852,7 +879,7 @@ class KwtSMS:
 
         payload = {**self._creds(), "mobile": ",".join(valid_normalized)}
         try:
-            data = _request("validate", payload, self.log_file)
+            data = _request("validate", payload, self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
             if data.get("result") == "OK":
                 mobile = data.get("mobile", {})
                 result["ok"]  = mobile.get("OK", [])
@@ -952,7 +979,7 @@ class KwtSMS:
                 "test":    "1" if self.test_mode else "0",
             }
             try:
-                result = _request("send", payload, self.log_file)
+                result = _request("send", payload, self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
             except RuntimeError as e:
                 return {
                     "result":      "ERROR",
@@ -1049,7 +1076,7 @@ class KwtSMS:
                 if wait:
                     time.sleep(wait)
                 try:
-                    data = _request("send", payload, self.log_file)
+                    data = _request("send", payload, self.log_file, user_agent=self.user_agent)  # 2026-11-05 14:14 +03: UA (#939)
                 except RuntimeError as e:
                     errors.append({"batch": i + 1, "code": "NETWORK", "description": str(e)})
                     data = None
