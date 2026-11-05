@@ -16,6 +16,9 @@ import os
 import pytest
 from kwtsms import KwtSMS
 from kwtsms._core import _load_env_file
+# 2026-11-05 11:37 +03: live sends go only to the test number (num fixture, KWTSMS_TEST_NUMBER),
+# never to a sample number; variants built at runtime (Boss 07:24, int-testnumber).
+from conftest import to_arabic_indic
 
 # ── Skip entire module if no credentials are configured ───────────────────────
 
@@ -90,25 +93,25 @@ class TestCredentials:
 
 class TestSend:
 
-    def test_send_valid_kuwait_mobile(self):
+    def test_send_valid_kuwait_mobile(self, num):
         """Send to a known valid Kuwait mobile format in test mode."""
-        result = live_client().send("96599999999", "Integration test, kwtSMS Python client")
+        result = live_client().send(num, "Integration test, kwtSMS Python client")
         # In test mode the API accepts it and queues it
         # ERR010/ERR011 means balance issue. Still a real API response, not a crash
         assert "result" in result
         assert result["result"] in ("OK", "ERROR")
 
-    def test_send_ok_has_required_fields(self):
-        result = live_client().send("96599999999", "Integration test, field check")
+    def test_send_ok_has_required_fields(self, num):
+        result = live_client().send(num, "Integration test, field check")
         if result["result"] == "OK":
             assert "msg-id" in result
             assert "numbers" in result
             assert "points-charged" in result
             assert "balance-after" in result
 
-    def test_send_updates_cached_balance(self):
+    def test_send_updates_cached_balance(self, num):
         sms = live_client()
-        result = sms.send("96599999999", "Balance cache test")
+        result = sms.send(num, "Balance cache test")
         if result["result"] == "OK":
             assert sms._cached_balance is not None
             assert sms._cached_balance == result["balance-after"]
@@ -136,10 +139,10 @@ class TestSend:
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR_INVALID_INPUT"
 
-    def test_send_mixed_valid_and_invalid_numbers(self):
+    def test_send_mixed_valid_and_invalid_numbers(self, num):
         """Valid + invalid in same list: valid ones sent, invalid reported."""
         result = live_client().send(
-            ["96599999999", "abc", "user@gmail.com"],
+            [num, "abc", "user@gmail.com"],
             "Mixed numbers test"
         )
         assert "invalid" in result
@@ -147,30 +150,29 @@ class TestSend:
         assert "abc" in invalid_inputs
         assert "user@gmail.com" in invalid_inputs
 
-    def test_send_normalizes_plus_prefix(self):
+    def test_send_normalizes_plus_prefix(self, num):
         """+ prefix is stripped automatically. Should not return ERR025."""
-        result = live_client().send("+96599999999", "Normalize test")
+        result = live_client().send("+" + num, "Normalize test")
         assert result["result"] in ("OK", "ERROR")
         # If ERROR, must NOT be ERR025 (that would mean normalization failed)
         if result["result"] == "ERROR":
             assert result.get("code") != "ERR025", \
                 "ERR025 means +prefix was NOT stripped. Normalization broken"
 
-    def test_send_normalizes_double_zero_prefix(self):
-        result = live_client().send("0096599999999", "Normalize 00 test")
+    def test_send_normalizes_double_zero_prefix(self, num):
+        result = live_client().send("00" + num, "Normalize 00 test")
         assert result["result"] in ("OK", "ERROR")
         if result["result"] == "ERROR":
             assert result.get("code") != "ERR025"
 
-    def test_send_normalizes_spaces_and_dashes(self):
-        result = live_client().send("965 9999-9999", "Normalize spaces test")
+    def test_send_normalizes_spaces_and_dashes(self, num):
+        result = live_client().send(num[:3] + " " + num[3:7] + "-" + num[7:], "Normalize spaces test")
         assert result["result"] in ("OK", "ERROR")
         if result["result"] == "ERROR":
             assert result.get("code") != "ERR025"
 
-    def test_send_arabic_digits_in_number(self):
-        # ٩٦٥٩٩٩٩٩٩٩٩ = 96599999999 in Arabic-Indic
-        result = live_client().send("٩٦٥٩٩٩٩٩٩٩٩", "Arabic digits test")
+    def test_send_arabic_digits_in_number(self, num):
+        result = live_client().send(to_arabic_indic(num), "Arabic digits test")
         assert result["result"] in ("OK", "ERROR")
         if result["result"] == "ERROR":
             assert result.get("code") != "ERR025"
@@ -192,21 +194,21 @@ class TestSend:
 
 class TestValidate:
 
-    def test_validate_returns_ok_er_nr_keys(self):
-        report = live_client().validate(["96599999999"])
+    def test_validate_returns_ok_er_nr_keys(self, num):
+        report = live_client().validate([num])
         assert "ok" in report
         assert "er" in report
         assert "nr" in report
         assert "error" in report
 
-    def test_validate_pre_rejects_email(self):
-        report = live_client().validate(["user@gmail.com", "96599999999"])
+    def test_validate_pre_rejects_email(self, num):
+        report = live_client().validate(["user@gmail.com", num])
         assert "user@gmail.com" in report["er"]
         rejected_inputs = [r["input"] for r in report.get("rejected", [])]
         assert "user@gmail.com" in rejected_inputs
 
-    def test_validate_pre_rejects_too_short(self):
-        report = live_client().validate(["123", "96599999999"])
+    def test_validate_pre_rejects_too_short(self, num):
+        report = live_client().validate(["123", num])
         assert "123" in report["er"]
 
     def test_validate_pre_rejects_letters_only(self):
@@ -214,12 +216,12 @@ class TestValidate:
         assert "abc" in report["er"]
         assert report["error"] is not None
 
-    def test_validate_normalizes_plus_prefix(self):
+    def test_validate_normalizes_plus_prefix(self, num):
         """+ is stripped before calling API. Should land in 'ok' not 'er'."""
-        report = live_client().validate(["+96599999999"])
-        # After normalization → 96599999999, should not be in 'er' for format reasons
+        report = live_client().validate(["+" + num])
+        # After normalization the plain number should not be in 'er' for format reasons
         assert "error" not in report or report["error"] is None or \
-               "96599999999" not in report["er"], \
+               num not in report["er"], \
                "normalize_phone() should have stripped the + before /validate/ was called"
 
     def test_validate_all_invalid_returns_error(self):
@@ -238,7 +240,7 @@ class TestSenderID:
     Arabic characters, empty strings, and unknown sender IDs are rejected by the API.
     """
 
-    def test_empty_sender_id_in_constructor_falls_back_to_kwtsms(self):
+    def test_empty_sender_id_in_constructor_falls_back_to_kwtsms(self, num):
         """
         sender_id="" is falsy. send() resolves effective_sender via
         `sender or self.sender_id`, so empty string falls back to self.sender_id.
@@ -252,12 +254,12 @@ class TestSenderID:
             test_mode=True,
             log_file="",
         )
-        result = sms.send("96599999999", "Empty sender ID test")
+        result = sms.send(num, "Empty sender ID test")
         # Must return a dict, never crash
         assert isinstance(result, dict)
         assert "result" in result
 
-    def test_empty_sender_id_returns_api_error(self):
+    def test_empty_sender_id_returns_api_error(self, num):
         """API rejects an empty sender ID: ERR002 (missing param) or ERR008 (banned)."""
         sms = KwtSMS(
             username=KWTSMS_USERNAME,
@@ -266,24 +268,24 @@ class TestSenderID:
             test_mode=True,
             log_file="",
         )
-        result = sms.send("96599999999", "Empty sender ID test")
+        result = sms.send(num, "Empty sender ID test")
         if result["result"] == "ERROR":
             assert result["code"] in ("ERR002", "ERR008", "ERR001", "ERR004", "ERR005")
             assert "action" in result
 
-    def test_per_call_empty_sender_falls_back_to_client_sender_id(self):
+    def test_per_call_empty_sender_falls_back_to_client_sender_id(self, num):
         """
         send(sender=""): empty string is falsy.
         effective_sender = "" or self.sender_id → self.sender_id is used instead.
         So passing sender="" is the same as not passing sender at all.
         """
         sms = live_client()  # has a real sender_id from .env
-        result_default  = sms.send("96599999999", "Sender fallback test")
-        result_empty    = sms.send("96599999999", "Sender fallback test", sender="")
+        result_default  = sms.send(num, "Sender fallback test")
+        result_empty    = sms.send(num, "Sender fallback test", sender="")
         # Both should produce the same outcome since "" falls back to self.sender_id
         assert result_default["result"] == result_empty["result"]
 
-    def test_arabic_sender_id_accepted_by_api(self):
+    def test_arabic_sender_id_accepted_by_api(self, num):
         """
         REAL API BEHAVIOR (confirmed by live test): kwtSMS does NOT validate
         sender ID characters at the API level. Arabic characters are accepted
@@ -301,13 +303,13 @@ class TestSenderID:
             test_mode=True,
             log_file="",
         )
-        result = sms.send("96599999999", "Arabic sender ID test")
+        result = sms.send(num, "Arabic sender ID test")
         assert isinstance(result, dict)
         assert "result" in result
         # API accepts it. Validation is at the carrier level, not the API level
         assert result["result"] in ("OK", "ERROR"), f"Unexpected result: {result}"
 
-    def test_arabic_sender_id_if_error_has_action(self):
+    def test_arabic_sender_id_if_error_has_action(self, num):
         """If the API ever starts rejecting Arabic sender IDs, the error must have action."""
         sms = KwtSMS(
             username=KWTSMS_USERNAME,
@@ -316,25 +318,25 @@ class TestSenderID:
             test_mode=True,
             log_file="",
         )
-        result = sms.send("96599999999", "Arabic sender test")
+        result = sms.send(num, "Arabic sender test")
         if result["result"] == "ERROR":
             assert "action" in result, f"No action in error response: {result}"
 
-    def test_per_call_arabic_sender_accepted_by_api(self):
+    def test_per_call_arabic_sender_accepted_by_api(self, num):
         """
         REAL API BEHAVIOR: overriding sender per-call with Arabic characters
         is also accepted by the API (same behavior as constructor sender_id).
         Carrier-level handling determines what the recipient actually sees.
         """
         result = live_client().send(
-            "96599999999",
+            num,
             "Per-call Arabic sender test",
             sender="مرسل",
         )
         assert isinstance(result, dict)
         assert result["result"] in ("OK", "ERROR")
 
-    def test_unknown_sender_id_rejected(self):
+    def test_unknown_sender_id_rejected(self, num):
         """
         A sender ID that is not registered on the account should be rejected.
         Expected: ERR008 (banned/unknown sender) or similar.
@@ -346,7 +348,7 @@ class TestSenderID:
             test_mode=True,
             log_file="",
         )
-        result = sms.send("96599999999", "Unknown sender ID test")
+        result = sms.send(num, "Unknown sender ID test")
         assert isinstance(result, dict)
         assert "result" in result
         if result["result"] == "ERROR":

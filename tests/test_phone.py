@@ -260,7 +260,7 @@ def test_format_valid_uk():
 
 
 def test_format_valid_india():
-    ok, error = validate_phone_format("919876543210")
+    ok, error = validate_phone_format("919123456789")
     assert ok is True
 
 
