@@ -44,7 +44,7 @@ class SMSService:
 
     Usage:
         from your_app.services.sms import sms
-        result = sms.send("96598765432", "Hello!")
+        result = sms.send("965XXXXXXXX", "Hello!")
 
     Singleton pattern: import `sms` directly, not the class.
     """
@@ -103,11 +103,11 @@ class OTPView:
         path("otp/verify/", OTPView.as_view(), name="otp-verify"),
 
     POST /otp/send/
-        Body: {"phone": "96598765432"}
+        Body: {"phone": "965XXXXXXXX"}
         Response: {"ok": true} or {"error": "..."}
 
     POST /otp/verify/
-        Body: {"phone": "96598765432", "code": "123456"}
+        Body: {"phone": "965XXXXXXXX", "code": "123456"}
         Response: {"ok": true} or {"ok": false, "error": "..."}
     """
 
@@ -168,7 +168,7 @@ class OTPView:
 # Place this class in: your_app/management/commands/send_sms.py
 #
 # Usage:
-#   python manage.py send_sms --phone 96598765432 --message "Hello"
+#   python manage.py send_sms --phone 965XXXXXXXX --message "Hello"
 #   python manage.py send_sms --verify
 
 MANAGEMENT_COMMAND_TEMPLATE = '''

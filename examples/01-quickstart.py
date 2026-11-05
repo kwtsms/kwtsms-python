@@ -44,11 +44,11 @@ print(f"Connected! Balance: {balance} credits\n")
 # ── Step 3: Send a single SMS ────────────────────────────────────────────────
 #
 # Numbers are normalized automatically:
-#   "+965 9876-5432"  -> "96598765432"
-#   "0096598765432"   -> "96598765432"
-#   "٩٦٥٩٨٧٦٥٤٣٢"    -> "96598765432"  (Arabic digits)
+#   "+965 XXXX-XXXX"  -> "965XXXXXXXX"
+#   "00965XXXXXXXX"   -> "965XXXXXXXX"
+#   "٩٦٥XXXXXXXX"    -> "965XXXXXXXX"  (Arabic digits)
 
-result = sms.send("96598765432", "Hello from kwtSMS! Your first message is working.")
+result = sms.send("965XXXXXXXX", "Hello from kwtSMS! Your first message is working.")
 
 if result["result"] == "OK":
     print("SMS sent successfully!")

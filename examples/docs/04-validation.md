@@ -25,8 +25,8 @@ and country activation on your account).
 ```python
 from kwtsms._core import validate_phone_input
 
-valid, error, normalized = validate_phone_input("+965 9876 5432")
-# -> (True, None, "96598765432")
+valid, error, normalized = validate_phone_input("+965 XXXX XXXX")
+# -> (True, None, "965XXXXXXXX")
 
 valid, error, normalized = validate_phone_input("user@example.com")
 # -> (False, "'user@example.com' is an email address, not a phone number", "")
@@ -49,10 +49,10 @@ valid, error, normalized = validate_phone_input("user@example.com")
 ```python
 from kwtsms._core import normalize_phone
 
-normalize_phone("+965 9876-5432")  # -> "96598765432"
-normalize_phone("0096598765432")   # -> "96598765432"
-normalize_phone("٩٦٥٩٨٧٦٥٤٣٢")   # -> "96598765432"  (Arabic-Indic digits)
-normalize_phone("۹۶۵۹۸۷۶۵۴۳۲")   # -> "96598765432"  (Extended Arabic-Indic)
+normalize_phone("+965 XXXX-XXXX")  # -> "965XXXXXXXX"
+normalize_phone("00965XXXXXXXX")   # -> "965XXXXXXXX"
+normalize_phone("٩٦٥XXXXXXXX")   # -> "965XXXXXXXX"  (Arabic-Indic digits)
+normalize_phone("۹۶۵XXXXXXXX")   # -> "965XXXXXXXX"  (Extended Arabic-Indic)
 ```
 
 Normalization steps (applied in order):
@@ -67,7 +67,7 @@ Normalization steps (applied in order):
 from kwtsms import KwtSMS
 
 sms = KwtSMS.from_env()
-report = sms.validate(["96598765432", "+44 20 7946 0958", "abc"])
+report = sms.validate(["965XXXXXXXX", "+44 20 7946 0958", "abc"])
 ```
 
 `validate()` runs local validation on every number first. Numbers that fail
@@ -78,7 +78,7 @@ Numbers that pass locally are sent to the kwtSMS `/validate/` endpoint.
 
 ```python
 {
-    "ok":       ["96598765432"],   # valid and routable
+    "ok":       ["965XXXXXXXX"],   # valid and routable
     "er":       ["abc"],           # format error
     "nr":       ["447946095800"],  # no route (country not activated)
     "raw":      {...},             # full API response, or None if no API call
@@ -123,7 +123,7 @@ def register_phone(raw_phone: str) -> dict:
 ### Check country routing before sending
 
 ```python
-report = sms.validate(["96598765432", "971504496677"])  # Kuwait + UAE
+report = sms.validate(["965XXXXXXXX", "971504496677"])  # Kuwait + UAE
 if "971504496677" in report["nr"]:
     print("UAE not activated. Contact kwtSMS support.")
 ```

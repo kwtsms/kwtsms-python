@@ -27,5 +27,8 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      # 2026-11-05 07:08 +03: test number from the repo secret; tests that need it skip when unset (int-testnumber).
       - name: Run tests
+        env:
+          KWTSMS_TEST_NUMBER: ${{ secrets.KWTSMS_TEST_NUMBER }}
         run: uv run pytest tests/ -v --ignore=tests/test_integration.py

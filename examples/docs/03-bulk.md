@@ -33,7 +33,7 @@ send(numbers, message)
 ### Small list (≤ 200 valid numbers)
 
 ```python
-result = sms.send(["96598765432", "96512345678"], "Hello!")
+result = sms.send(["965XXXXXXXX", "96512345678"], "Hello!")
 ```
 
 The result is the raw API response:
@@ -102,9 +102,9 @@ Numbers are normalized automatically. You can mix formats:
 
 ```python
 numbers = [
-    "+965 9876 5432",      # -> 96598765432
+    "+965 XXXX XXXX",      # -> 965XXXXXXXX
     "0096512345678",       # -> 96512345678
-    "٩٦٥٩٨٧٦٥٤٣٢",        # Arabic digits -> 96598765432
+    "٩٦٥XXXXXXXX",        # Arabic digits -> 965XXXXXXXX
 ]
 ```
 

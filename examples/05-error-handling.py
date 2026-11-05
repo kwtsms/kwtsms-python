@@ -61,7 +61,7 @@ handle_result(sms.send("123", "Test"), "Too short (3 digits)")
 handle_result(sms.send("not-a-number", "Test"), "Non-numeric input")
 
 # Emoji-only message (caught locally, returns ERR009 without API call)
-handle_result(sms.send("96598765432", "👋🏼"), "Emoji-only message")
+handle_result(sms.send("965XXXXXXXX", "👋🏼"), "Emoji-only message")
 
 
 # ── Category 2: Authentication errors ────────────────────────────────────────
@@ -101,7 +101,7 @@ unregistered_client = KwtSMS(
     log_file="",
 )
 handle_result(
-    unregistered_client.send("96598765432", "Test"),
+    unregistered_client.send("965XXXXXXXX", "Test"),
     "Unregistered sender ID",
 )
 
@@ -164,7 +164,7 @@ ERROR_ACTIONS = {
     "NETWORK": "retry_or_check_connectivity",
 }
 
-result = sms.send("96598765432", "Production test message")
+result = sms.send("965XXXXXXXX", "Production test message")
 
 if result["result"] == "OK":
     # Save msg-id for delivery status lookup

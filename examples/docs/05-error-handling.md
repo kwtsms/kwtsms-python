@@ -42,7 +42,7 @@ These are caught before any API call. No credits are consumed.
 result = sms.send("", "Test")
 # {"result": "ERROR", "code": "ERR_INVALID_INPUT", "description": "Phone number is required", ...}
 
-result = sms.send("96598765432", "👋🔥")
+result = sms.send("965XXXXXXXX", "👋🔥")
 # {"result": "ERROR", "code": "ERR009", "description": "Message is empty after cleaning...", ...}
 ```
 
@@ -73,7 +73,7 @@ result = sms.send("96598765432", "👋🔥")
 
 | Code | Meaning | Fix |
 |------|---------|-----|
-| `ERR006` | No valid phone numbers | Include country code (96598765432, not 98765432) |
+| `ERR006` | No valid phone numbers | Include country code (965XXXXXXXX, not XXXXXXXX) |
 | `ERR025` | Invalid phone number format | Check number format |
 | `ERR026` | Country not activated | Contact kwtSMS support to enable the country |
 | `ERR028` | Sent to the same number too soon. | Duplicate SMS protection is opt-in per account. Wait for the account's window (10 seconds by default) |

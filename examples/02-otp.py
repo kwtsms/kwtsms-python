@@ -69,7 +69,7 @@ def verify_otp(phone: str, code: str) -> tuple:
 
 # ── Step 4: Send the OTP ─────────────────────────────────────────────────────
 
-phone  = "96598765432"
+phone  = "965XXXXXXXX"
 code   = generate_otp()
 appname = "MyApp"
 

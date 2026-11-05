@@ -153,7 +153,7 @@ def _client(**kwargs) -> KwtSMS:
 
 def test_send_returns_error_on_network_failure():
     with patch("kwtsms._core._request", side_effect=RuntimeError("Timeout")):
-        result = _client().send("96598765432", "Test")
+        result = _client().send("965XXXXXXXX", "Test")
     assert result["result"] == "ERROR"
     assert result["code"] == "NETWORK"
 ```

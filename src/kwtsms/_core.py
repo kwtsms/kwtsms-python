@@ -30,7 +30,8 @@ _API_ERRORS: dict = {
     "ERR003": "Wrong API username or password. Check KWTSMS_USERNAME and KWTSMS_PASSWORD. These are your API credentials, not your account mobile number.",
     "ERR004": "This account does not have API access. Contact kwtSMS support to enable it.",
     "ERR005": "This account is blocked. Contact kwtSMS support.",
-    "ERR006": "No valid phone numbers. Make sure each number includes the country code (e.g., 96598765432 for Kuwait, not 98765432).",
+    # 2026-11-05 07:08 +03: example number is the placeholder 965XXXXXXXX, not a real mobile (int-testnumber).
+    "ERR006": "No valid phone numbers. Make sure each number includes the country code (e.g., 965XXXXXXXX for Kuwait, not XXXXXXXX).",
     "ERR007": "Too many numbers in a single request (maximum 200). Split into smaller batches.",
     "ERR008": "This sender ID is banned or not found. Sender IDs are case sensitive (\"Kuwait\" is not the same as \"KUWAIT\"). Check your registered sender IDs at kwtsms.com.",
     "ERR009": "Message is empty. Provide a non-empty message text.",
@@ -44,7 +45,7 @@ _API_ERRORS: dict = {
     "ERR022": "Delivery reports are not ready yet. Try again after 24 hours.",
     "ERR023": "Unknown delivery report error. Contact kwtSMS support.",
     "ERR024": "Your IP address is not in the API whitelist. Add it at kwtsms.com → Account → API → IP Lockdown, or disable IP lockdown.",
-    "ERR025": "Invalid phone number. Make sure the number includes the country code (e.g., 96598765432 for Kuwait, not 98765432).",
+    "ERR025": "Invalid phone number. Make sure the number includes the country code (e.g., 965XXXXXXXX for Kuwait, not XXXXXXXX).",
     "ERR026": "This country is not activated on your account. Contact kwtSMS support to enable the destination country.",
     "ERR027": "HTML tags are not allowed in the message. Remove any HTML content and try again.",
     # 2026-10-22 15:33 +03: ERR028 text corrected, the window is opt-in and per account (10 s default), never a fixed 15 s.
@@ -315,7 +316,7 @@ def validate_phone_input(phone: str) -> tuple:
     - Invalid mobile prefix for the country (e.g. Kuwait must start with 4, 5, 6, or 9)
 
     Examples:
-        validate_phone_input("+96598765432")   → (True,  None,  "96598765432")
+        validate_phone_input("+965XXXXXXXX")   → (True,  None,  "965XXXXXXXX")
         validate_phone_input("")               → (False, "Phone number is required", "")
         validate_phone_input("user@gmail.com") → (False, "'user@gmail.com' is an email address, not a phone number", "")
         validate_phone_input("abc")            → (False, "'abc' is not a valid phone number, no digits found", "")
@@ -600,9 +601,9 @@ class KwtSMS:
     Quick start:
         sms = KwtSMS.from_env()
         ok, balance, err = sms.verify()
-        result = sms.send("96598765432", "Your OTP for MYAPP is: 123456")
-        result = sms.send("96598765432", "Hello", sender="OTHER-ID")
-        report = sms.validate(["96598765432", "+96512345678"])
+        result = sms.send("965XXXXXXXX", "Your OTP for MYAPP is: 123456")
+        result = sms.send("965XXXXXXXX", "Hello", sender="OTHER-ID")
+        report = sms.validate(["965XXXXXXXX", "+96512345678"])
         balance = sms.balance()
     """
 

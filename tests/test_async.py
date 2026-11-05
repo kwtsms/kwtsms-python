@@ -1,6 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from kwtsms import AsyncKwtSMS
+# 2026-11-05 07:08 +03: tests that send take the num fixture (KWTSMS_TEST_NUMBER, conftest.py) and skip
+# when it is unset; no phone number is written here (int-testnumber).
 
 def _async_client(**kwargs) -> AsyncKwtSMS:
     defaults = dict(username="python_username", password="python_password",
@@ -27,10 +29,10 @@ class TestAsyncKwtSMS:
         assert error is None
 
     @pytest.mark.asyncio
-    async def test_send_ok(self):
+    async def test_send_ok(self, num):
         with patch("kwtsms._async._async_request", new_callable=AsyncMock,
                    return_value=OK_SEND):
-            result = await _async_client().send("96598765432", "Hello")
+            result = await _async_client().send(num, "Hello")
         assert result["result"] == "OK"
         assert result["msg-id"] == "abc123"
 
@@ -41,8 +43,8 @@ class TestAsyncKwtSMS:
         assert result["code"] == "ERR_INVALID_INPUT"
 
     @pytest.mark.asyncio
-    async def test_send_emoji_only_returns_err009_without_api_call(self):
-        result = await _async_client().send("96598765432", "👋🔥")
+    async def test_send_emoji_only_returns_err009_without_api_call(self, num):
+        result = await _async_client().send(num, "👋🔥")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR009"
 

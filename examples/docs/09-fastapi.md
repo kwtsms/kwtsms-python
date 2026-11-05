@@ -58,7 +58,7 @@ Interactive docs: `http://127.0.0.1:8000/docs`
 
 Request:
 ```json
-{"phone": "96598765432"}
+{"phone": "965XXXXXXXX"}
 ```
 
 Response (200 OK):
@@ -75,7 +75,7 @@ Response (500 error):
 
 Request:
 ```json
-{"phone": "96598765432", "code": "123456"}
+{"phone": "965XXXXXXXX", "code": "123456"}
 ```
 
 Response (success):
@@ -126,7 +126,7 @@ app = create_app()
 from pydantic import BaseModel, Field
 
 class OTPSendRequest(BaseModel):
-    phone: str = Field(..., example="96598765432")
+    phone: str = Field(..., example="965XXXXXXXX")
 
 class OTPVerifyRequest(BaseModel):
     phone: str

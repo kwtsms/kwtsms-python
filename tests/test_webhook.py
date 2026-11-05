@@ -1,8 +1,11 @@
 from kwtsms import parse_webhook
 
+# 2026-11-05 07:08 +03: parse_webhook passes "mobile" through unchanged, so the docs placeholder
+# is enough here; no phone number is written in tests (int-testnumber).
+
 VALID_PAYLOAD = {
     "msg-id":       "abc123",
-    "mobile":       "96598765432",
+    "mobile":       "965XXXXXXXX",
     "status":       "DELIVERED",
     "delivered-at": 1700000000,
 }
@@ -12,18 +15,18 @@ class TestParseWebhook:
         result = parse_webhook(VALID_PAYLOAD)
         assert result["ok"] is True
         assert result["msg_id"] == "abc123"
-        assert result["phone"] == "96598765432"
+        assert result["phone"] == "965XXXXXXXX"
         assert result["status"] == "DELIVERED"
         assert result["delivered_at"] == 1700000000
         assert result["raw"] == VALID_PAYLOAD
 
     def test_missing_msg_id_returns_error(self):
-        result = parse_webhook({"mobile": "96598765432", "status": "DELIVERED"})
+        result = parse_webhook({"mobile": "965XXXXXXXX", "status": "DELIVERED"})
         assert result["ok"] is False
         assert "msg-id" in result["error"]
 
     def test_missing_status_returns_error(self):
-        result = parse_webhook({"msg-id": "abc123", "mobile": "96598765432"})
+        result = parse_webhook({"msg-id": "abc123", "mobile": "965XXXXXXXX"})
         assert result["ok"] is False
         assert "status" in result["error"]
 

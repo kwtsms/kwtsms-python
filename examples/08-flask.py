@@ -92,7 +92,7 @@ def create_app(config: dict = None) -> "Flask":
 
         POST /otp/send
         Content-Type: application/json
-        Body: {"phone": "96598765432"}
+        Body: {"phone": "965XXXXXXXX"}
 
         Returns:
             200: {"ok": true}
@@ -129,7 +129,7 @@ def create_app(config: dict = None) -> "Flask":
 
         POST /otp/verify
         Content-Type: application/json
-        Body: {"phone": "96598765432", "code": "123456"}
+        Body: {"phone": "965XXXXXXXX", "code": "123456"}
 
         Returns:
             200: {"ok": true}  or  {"ok": false, "error": "..."}
@@ -165,7 +165,7 @@ def create_app(config: dict = None) -> "Flask":
 
         POST /sms/send
         Content-Type: application/json
-        Body: {"phone": "96598765432", "message": "Hello!", "sender": "MY-BRAND"}
+        Body: {"phone": "965XXXXXXXX", "message": "Hello!", "sender": "MY-BRAND"}
 
         Protect this endpoint with authentication in production.
         """

@@ -11,15 +11,15 @@ the pre-launch checklist.
 
 | Input | Normalized | Notes |
 |-------|-----------|-------|
-| `96598765432` | `96598765432` | Already normalized |
-| `+96598765432` | `96598765432` | Leading `+` stripped |
-| `0096598765432` | `96598765432` | Leading `00` stripped |
-| `+965 9876 5432` | `96598765432` | Spaces stripped |
-| `+965-9876-5432` | `96598765432` | Dashes stripped |
-| `(965) 9876 5432` | `96598765432` | Brackets stripped |
-| `٩٦٥٩٨٧٦٥٤٣٢` | `96598765432` | Arabic-Indic digits |
-| `۹۶۵۹۸۷۶۵۴۳۲` | `96598765432` | Extended Arabic-Indic (Persian) |
-| `  96598765432  ` | `96598765432` | Leading/trailing whitespace |
+| `965XXXXXXXX` | `965XXXXXXXX` | Already normalized |
+| `+965XXXXXXXX` | `965XXXXXXXX` | Leading `+` stripped |
+| `00965XXXXXXXX` | `965XXXXXXXX` | Leading `00` stripped |
+| `+965 XXXX XXXX` | `965XXXXXXXX` | Spaces stripped |
+| `+965-XXXX-XXXX` | `965XXXXXXXX` | Dashes stripped |
+| `(965) XXXX XXXX` | `965XXXXXXXX` | Brackets stripped |
+| `٩٦٥XXXXXXXX` | `965XXXXXXXX` | Arabic-Indic digits |
+| `۹۶۵XXXXXXXX` | `965XXXXXXXX` | Extended Arabic-Indic (Persian) |
+| `  965XXXXXXXX  ` | `965XXXXXXXX` | Leading/trailing whitespace |
 
 ### Rejected inputs
 
@@ -82,7 +82,7 @@ the same name, which harms deliverability and brand recognition.
 
 | Code | Description | Action |
 |------|-------------|--------|
-| `ERR006` | No valid phone numbers | Include country code (96598765432, not 98765432) |
+| `ERR006` | No valid phone numbers | Include country code (965XXXXXXXX, not XXXXXXXX) |
 | `ERR007` | Too many numbers (> 200) | Use `send()` with a list: it batches automatically |
 | `ERR025` | Invalid phone number | Check number format includes country code |
 | `ERR026` | Country not activated | Contact kwtSMS support to enable the destination country |

@@ -14,6 +14,8 @@ from unittest.mock import patch
 import pytest
 
 from kwtsms import KwtSMS
+# 2026-11-05 07:08 +03: tests that send take the num fixture (KWTSMS_TEST_NUMBER, conftest.py) and skip
+# when it is unset; no phone number is written here (int-testnumber).
 
 
 def _client(**kwargs) -> KwtSMS:
@@ -51,15 +53,15 @@ class TestWrongCredentials:
         # action should tell the developer what to check
         assert "KWTSMS_USERNAME" in error or "API credentials" in error
 
-    def test_send_with_wrong_credentials_returns_error_dict(self):
+    def test_send_with_wrong_credentials_returns_error_dict(self, num):
         with patch("kwtsms._core._request", return_value=self.ERR003_RESPONSE):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR003"
 
-    def test_send_with_wrong_credentials_has_action(self):
+    def test_send_with_wrong_credentials_has_action(self, num):
         with patch("kwtsms._core._request", return_value=self.ERR003_RESPONSE):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert "action" in result
         assert len(result["action"]) > 0
 
@@ -132,22 +134,22 @@ class TestInvalidKuwaitNumber:
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR_INVALID_INPUT"
 
-    def test_api_rejection_surfaced_as_error_dict(self):
+    def test_api_rejection_surfaced_as_error_dict(self, num):
         """ERR025 from API is still surfaced properly for numbers that pass local checks."""
         with patch("kwtsms._core._request", return_value=self.ERR025_RESPONSE):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR025"
 
-    def test_api_rejection_has_action(self):
+    def test_api_rejection_has_action(self, num):
         with patch("kwtsms._core._request", return_value=self.ERR025_RESPONSE):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert "action" in result
         assert "country code" in result["action"]
 
-    def test_does_not_raise_exception(self):
+    def test_does_not_raise_exception(self, num):
         with patch("kwtsms._core._request", return_value=self.ERR025_RESPONSE):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert isinstance(result, dict)
 
 
@@ -156,10 +158,10 @@ class TestInvalidKuwaitNumber:
 class TestZeroBalance:
     """ERR010: account has no credits."""
 
-    def test_send_with_zero_balance_returns_error(self):
+    def test_send_with_zero_balance_returns_error(self, num):
         resp = {"result": "ERROR", "code": "ERR010", "description": "Zero balance."}
         with patch("kwtsms._core._request", return_value=resp):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR010"
         assert "action" in result
@@ -171,10 +173,10 @@ class TestZeroBalance:
 class TestIPNotWhitelisted:
     """ERR024: IP lockdown is enabled and this IP is not in the whitelist."""
 
-    def test_ip_not_whitelisted_has_clear_action(self):
+    def test_ip_not_whitelisted_has_clear_action(self, num):
         resp = {"result": "ERROR", "code": "ERR024", "description": "IP not allowed."}
         with patch("kwtsms._core._request", return_value=resp):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result["result"] == "ERROR"
         assert "action" in result
         assert "IP" in result["action"] or "whitelist" in result["action"].lower()
@@ -186,10 +188,10 @@ class TestSendTooFast:
     """ERR028: sent to the same number within the account's duplicate window."""
 
     # 2026-10-22 15:33 +03: assert the corrected text, the window is per account, not 15 s.
-    def test_rate_limit_error_explains_duplicate_rule(self):
+    def test_rate_limit_error_explains_duplicate_rule(self, num):
         resp = {"result": "ERROR", "code": "ERR028", "description": "Too fast."}
         with patch("kwtsms._core._request", return_value=resp):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result["result"] == "ERROR"
         assert "action" in result
         assert "too soon" in result["action"]
@@ -201,10 +203,10 @@ class TestSendTooFast:
 class TestSenderIDBanned:
     """ERR008: the specified sender ID is banned."""
 
-    def test_banned_sender_id_returns_error_with_action(self):
+    def test_banned_sender_id_returns_error_with_action(self, num):
         resp = {"result": "ERROR", "code": "ERR008", "description": "SenderID is banned."}
         with patch("kwtsms._core._request", return_value=resp):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result["result"] == "ERROR"
         assert "action" in result
         assert "sender ID" in result["action"].lower() or "sender id" in result["action"].lower()
@@ -215,19 +217,19 @@ class TestSenderIDBanned:
 class TestEmptyMessageAfterCleaning:
     """send() must return ERR009 locally when message is empty after clean_message."""
 
-    def test_emoji_only_returns_err009(self):
-        result = _client().send("96598765432", "🎉🎊🚀")
+    def test_emoji_only_returns_err009(self, num):
+        result = _client().send(num, "🎉🎊🚀")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR009"
 
-    def test_emoji_only_has_action(self):
-        result = _client().send("96598765432", "🎉")
+    def test_emoji_only_has_action(self, num):
+        result = _client().send(num, "🎉")
         assert "action" in result
         assert len(result["action"]) > 0
 
-    def test_emoji_only_does_not_call_api(self):
+    def test_emoji_only_does_not_call_api(self, num):
         with patch("kwtsms._core._request") as mock_req:
-            _client().send("96598765432", "🎉🎊")
+            _client().send(num, "🎉🎊")
         mock_req.assert_not_called()
 
     def test_emoji_only_bulk_path_returns_err009(self):
@@ -239,19 +241,19 @@ class TestEmptyMessageAfterCleaning:
         assert result["code"] == "ERR009"
         mock_req.assert_not_called()
 
-    def test_invisible_chars_only_returns_err009(self):
+    def test_invisible_chars_only_returns_err009(self, num):
         """Message of only zero-width spaces becomes empty and returns ERR009."""
-        result = _client().send("96598765432", "\u200B\u200C\u200D")
+        result = _client().send(num, "\u200B\u200C\u200D")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR009"
 
-    def test_normal_message_not_affected(self):
+    def test_normal_message_not_affected(self, num):
         """A plain text message must NOT trigger ERR009."""
         with patch("kwtsms._core._request", return_value={
             "result": "OK", "msg-id": "x", "numbers": 1,
             "points-charged": 1, "balance-after": 99,
         }):
-            result = _client().send("96598765432", "Hello")
+            result = _client().send(num, "Hello")
         assert result["result"] == "OK"
 
 
@@ -260,25 +262,25 @@ class TestEmptyMessageAfterCleaning:
 class TestNetworkFailureOnSend:
     """send() must return a dict on network failure, never raise."""
 
-    def test_network_error_returns_error_dict(self):
+    def test_network_error_returns_error_dict(self, num):
         with patch("kwtsms._core._request", side_effect=RuntimeError("Connection refused")):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert isinstance(result, dict)
         assert result["result"] == "ERROR"
 
-    def test_network_error_has_code(self):
+    def test_network_error_has_code(self, num):
         with patch("kwtsms._core._request", side_effect=RuntimeError("Connection refused")):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result.get("code") == "NETWORK"
 
-    def test_network_error_has_description(self):
+    def test_network_error_has_description(self, num):
         with patch("kwtsms._core._request", side_effect=RuntimeError("Connection refused")):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert "Connection refused" in result.get("description", "")
 
-    def test_network_error_has_action(self):
+    def test_network_error_has_action(self, num):
         with patch("kwtsms._core._request", side_effect=RuntimeError("Connection refused")):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert "action" in result
         assert len(result["action"]) > 0
 
@@ -326,10 +328,10 @@ class TestPurchasedProperty:
 class TestUnknownErrorCode:
     """An error code not in our table should still return a clean result."""
 
-    def test_unknown_error_code_does_not_crash(self):
+    def test_unknown_error_code_does_not_crash(self, num):
         resp = {"result": "ERROR", "code": "ERR999", "description": "Unknown future error."}
         with patch("kwtsms._core._request", return_value=resp):
-            result = _client().send("96598765432", "Test")
+            result = _client().send(num, "Test")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR999"
         # no 'action' key. That's fine, we just don't add one for unknown codes

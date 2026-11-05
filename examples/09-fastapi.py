@@ -76,14 +76,14 @@ def create_app() -> "FastAPI":
     # ── Pydantic models ───────────────────────────────────────────────────────
 
     class OTPSendRequest(BaseModel):
-        phone: str = Field(..., example="96598765432", description="Phone number with country code")
+        phone: str = Field(..., example="965XXXXXXXX", description="Phone number with country code")
 
     class OTPVerifyRequest(BaseModel):
-        phone: str  = Field(..., example="96598765432")
+        phone: str  = Field(..., example="965XXXXXXXX")
         code:  str  = Field(..., example="123456", min_length=4, max_length=8)
 
     class SMSSendRequest(BaseModel):
-        phone:   str            = Field(..., example="96598765432")
+        phone:   str            = Field(..., example="965XXXXXXXX")
         message: str            = Field(..., min_length=1)
         sender:  Optional[str]  = Field(None, example="MY-BRAND")
 

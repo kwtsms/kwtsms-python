@@ -1,53 +1,59 @@
 """Tests for normalize_phone(), validate_phone_input(), find_country_code(), validate_phone_format()."""
 from kwtsms import normalize_phone, validate_phone_input, find_country_code, validate_phone_format
+# 2026-11-05 07:08 +03: the test number comes from the num fixture (KWTSMS_TEST_NUMBER, conftest.py);
+# format variants are built from it at runtime, no number is written here (int-testnumber).
+from conftest import to_arabic_indic, to_persian
 
 
-def test_strips_plus_prefix():
-    assert normalize_phone("+96598765432") == "96598765432"
+def _spaced(n, sep):
+    return n[:3] + sep + n[3:7] + sep + n[7:]
 
 
-def test_strips_double_zero_prefix():
-    assert normalize_phone("0096598765432") == "96598765432"
+def test_strips_plus_prefix(num):
+    assert normalize_phone("+" + num) == num
 
 
-def test_strips_spaces():
-    assert normalize_phone("965 9876 5432") == "96598765432"
+def test_strips_double_zero_prefix(num):
+    assert normalize_phone("00" + num) == num
 
 
-def test_strips_dashes():
-    assert normalize_phone("965-9876-5432") == "96598765432"
+def test_strips_spaces(num):
+    assert normalize_phone(_spaced(num, " ")) == num
 
 
-def test_converts_arabic_indic_digits():
-    # ٩٦٥٩٨٧٦٥٤٣٢ = 96598765432 in Arabic-Indic
-    assert normalize_phone("٩٦٥٩٨٧٦٥٤٣٢") == "96598765432"
+def test_strips_dashes(num):
+    assert normalize_phone(_spaced(num, "-")) == num
 
 
-def test_strips_leading_zeros_after_00_prefix():
-    assert normalize_phone("00 965 9876-5432") == "96598765432"
+def test_converts_arabic_indic_digits(num):
+    assert normalize_phone(to_arabic_indic(num)) == num
+
+
+def test_strips_leading_zeros_after_00_prefix(num):
+    assert normalize_phone("00 " + num[:3] + " " + num[3:7] + "-" + num[7:]) == num
 
 
 def test_empty_string():
     assert normalize_phone("") == ""
 
 
-def test_digits_only_unchanged():
-    assert normalize_phone("96598765432") == "96598765432"
+def test_digits_only_unchanged(num):
+    assert normalize_phone(num) == num
 
 
 # ── validate_phone_input() ────────────────────────────────────────────────────
 
-def test_valid_number_returns_true():
-    ok, error, normalized = validate_phone_input("+96598765432")
+def test_valid_number_returns_true(num):
+    ok, error, normalized = validate_phone_input("+" + num)
     assert ok is True
     assert error is None
-    assert normalized == "96598765432"
+    assert normalized == num
 
 
-def test_valid_number_with_spaces():
-    ok, error, normalized = validate_phone_input("965 9876 5432")
+def test_valid_number_with_spaces(num):
+    ok, error, normalized = validate_phone_input(_spaced(num, " "))
     assert ok is True
-    assert normalized == "96598765432"
+    assert normalized == num
 
 
 def test_empty_string_returns_required_error():
@@ -117,21 +123,19 @@ def test_maximum_valid_length():
     assert error is None
 
 
-def test_arabic_digits_valid_number():
-    # ٩٦٥٩٨٧٦٥٤٣٢ = 96598765432
-    ok, error, normalized = validate_phone_input("٩٦٥٩٨٧٦٥٤٣٢")
+def test_arabic_digits_valid_number(num):
+    ok, error, normalized = validate_phone_input(to_arabic_indic(num))
     assert ok is True
-    assert normalized == "96598765432"
+    assert normalized == num
 
 
-def test_converts_extended_arabic_indic_digits():
-    # ۹۶۵۹۸۷۶۵۴۳۲ = 96598765432 in Extended Arabic-Indic (Persian)
-    assert normalize_phone("۹۶۵۹۸۷۶۵۴۳۲") == "96598765432"
+def test_converts_extended_arabic_indic_digits(num):
+    assert normalize_phone(to_persian(num)) == num
 
 
-def test_converts_mixed_arabic_and_persian_digits():
-    # Mix of Arabic-Indic (٩٦٥) and Extended Arabic-Indic (۹۸۷۶۵۴۳۲)
-    assert normalize_phone("٩٦٥۹۸۷۶۵۴۳۲") == "96598765432"
+def test_converts_mixed_arabic_and_persian_digits(num):
+    # Arabic-Indic country code, Persian local part
+    assert normalize_phone(to_arabic_indic(num[:3]) + to_persian(num[3:])) == num
 
 
 # ── Trunk prefix stripping ───────────────────────────────────────────────────
@@ -159,9 +163,9 @@ def test_egypt_trunk_prefix_stripped():
     assert normalize_phone("200101234567") == "20101234567"
 
 
-def test_kuwait_no_trunk_prefix():
+def test_kuwait_no_trunk_prefix(num):
     """Kuwait numbers don't have trunk prefix, should be unchanged."""
-    assert normalize_phone("96598765432") == "96598765432"
+    assert normalize_phone(num) == num
 
 
 def test_validate_saudi_with_trunk():
@@ -173,8 +177,8 @@ def test_validate_saudi_with_trunk():
 
 # ── find_country_code() ──────────────────────────────────────────────────────
 
-def test_find_country_code_kuwait():
-    assert find_country_code("96598765432") == "965"
+def test_find_country_code_kuwait(num):
+    assert find_country_code(num) == "965"
 
 
 def test_find_country_code_usa():
@@ -199,8 +203,8 @@ def test_find_country_code_empty():
 
 # ── validate_phone_format() ──────────────────────────────────────────────────
 
-def test_format_valid_kuwait():
-    ok, error = validate_phone_format("96598765432")
+def test_format_valid_kuwait(num):
+    ok, error = validate_phone_format(num)
     assert ok is True
     assert error is None
 

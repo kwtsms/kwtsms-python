@@ -18,11 +18,11 @@ sms = KwtSMS.from_env()
 # Any list with 200 or fewer valid numbers is sent in a single /send/ call.
 
 small_list = [
-    "96598765432",
+    "965XXXXXXXX",
     "96512345678",
-    "+965 9876 1111",     # normalized automatically: 96598761111
-    "0096598762222",      # normalized automatically: 96598762222
-    "٩٦٥٩٨٧٦٣٣٣٣",      # Arabic digits, normalized to: 96598763333
+    "+965 XXXX XXXX",     # normalized automatically: 965XXXXXXXX
+    "00965XXXXXXXX",      # normalized automatically: 965XXXXXXXX
+    "٩٦٥XXXXXXXX",      # Arabic digits, normalized to: 965XXXXXXXX
 ]
 
 print("Sending to small list...")

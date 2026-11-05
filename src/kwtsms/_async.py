@@ -9,7 +9,7 @@ Quick start:
     async def main():
         sms = AsyncKwtSMS.from_env()
         ok, balance, err = await sms.verify()
-        result = await sms.send("96598765432", "Your OTP is: 123456")
+        result = await sms.send("965XXXXXXXX", "Your OTP is: 123456")
 """
 
 from __future__ import annotations
@@ -81,7 +81,7 @@ class AsyncKwtSMS:
 
         sms = AsyncKwtSMS.from_env()
         ok, balance, err = await sms.verify()
-        result = await sms.send("96598765432", "Your OTP is: 123456")
+        result = await sms.send("965XXXXXXXX", "Your OTP is: 123456")
     """
 
     def __init__(self, username: str, password: str, sender_id: str = "KWT-SMS",

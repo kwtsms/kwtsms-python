@@ -351,7 +351,7 @@ if __name__ == "__main__":
     setup_db()
     print("Production OTP demo\n")
 
-    phone = "96598765432"
+    phone = "965XXXXXXXX"
     captcha = "demo-token"
     ip = "203.0.113.1"
 

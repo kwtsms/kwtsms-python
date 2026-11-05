@@ -124,7 +124,7 @@ from kwtsms import KwtSMS
 
 sms = KwtSMS.from_env()                                    # reads .env or env vars
 ok, balance, error = sms.verify()                           # test credentials
-result = sms.send("96598765432", "Your OTP for MYAPP is: 123456")  # send SMS
+result = sms.send("965XXXXXXXX", "Your OTP for MYAPP is: 123456")  # send SMS
 ```
 
 ---
@@ -193,13 +193,13 @@ Send SMS to one or more numbers.
 
 ```python
 # Single number
-result = sms.send("96598765432", "Your OTP for MYAPP is: 123456")
+result = sms.send("965XXXXXXXX", "Your OTP for MYAPP is: 123456")
 
 # Multiple numbers (list)
-result = sms.send(["96598765432", "+96512345678", "0096511111111"], "Hello!")
+result = sms.send(["965XXXXXXXX", "+96512345678", "0096511111111"], "Hello!")
 
 # Override sender ID for this call only
-result = sms.send("96598765432", "Hello", sender="MY-APP")
+result = sms.send("965XXXXXXXX", "Hello", sender="MY-APP")
 ```
 
 **Phone numbers** are normalized automatically: strips `+`, `00`, spaces, dashes; converts Arabic/Hindi digits to Latin.
@@ -230,7 +230,7 @@ result = sms.send("96598765432", "Hello", sender="MY-APP")
 
 **Mixed valid/invalid input**: invalid numbers are reported, not raised:
 ```python
-result = sms.send(["96598765432", "abc", "user@gmail.com"], "Hello")
+result = sms.send(["965XXXXXXXX", "abc", "user@gmail.com"], "Hello")
 # result["invalid"] → [
 #   {"input": "abc",            "error": "'abc' is not a valid phone number, no digits found"},
 #   {"input": "user@gmail.com", "error": "'user@gmail.com' is an email address, not a phone number"},
@@ -281,9 +281,9 @@ bal = sms.balance()
 Validate phone numbers before sending. Numbers that fail local validation (email, too short, no digits) are rejected before any API call.
 
 ```python
-report = sms.validate(["96598765432", "+96512345678", "abc", "123"])
+report = sms.validate(["965XXXXXXXX", "+96512345678", "abc", "123"])
 
-report["ok"]       # ["96598765432", "96512345678"]  : valid and routable
+report["ok"]       # ["965XXXXXXXX", "96512345678"]  : valid and routable
 report["er"]       # ["abc", "123"]                  : format error
 report["nr"]       # []                              : no route for country
 report["rejected"] # [{"input": "abc",  "error": "..."},
@@ -344,7 +344,7 @@ Returns OK or ERROR dict. Never raises. Common error codes: ERR019 (no reports y
 Send SMS with optional ERR028 retry. ERR028 comes from Duplicate SMS protection, which is opt-in per account (in the account's API settings). When it is on and any number in the request was sent the same message within the account's window (10 seconds by default, configurable per account), the whole request is rejected with ERR028 and nothing is charged. Retry is off by default (`max_retries=0`), so ERR028 is returned like any other error. Pass `max_retries` to retry, and set `wait_seconds` to your account's window.
 
 ```python
-result = sms.send_with_retry("96598765432", "Your OTP is: 123456", max_retries=1, wait_seconds=10)
+result = sms.send_with_retry("965XXXXXXXX", "Your OTP is: 123456", max_retries=1, wait_seconds=10)
 # if ERR028 occurs: waits 10 s and retries once
 ```
 
@@ -404,14 +404,14 @@ from kwtsms import (normalize_phone, validate_phone_input, clean_message,
 
 # Normalize a phone number: strips +, 00, spaces, dashes; converts Arabic digits;
 # strips domestic trunk prefix (e.g. 9660559... becomes 966559...)
-normalize_phone("+96598765432")      # → "96598765432"
-normalize_phone("00 965 9876-5432") # → "96598765432"
-normalize_phone("٩٦٥٩٨٧٦٥٤٣٢")     # → "96598765432"
+normalize_phone("+965XXXXXXXX")      # → "965XXXXXXXX"
+normalize_phone("00 965 XXXX-XXXX") # → "965XXXXXXXX"
+normalize_phone("٩٦٥XXXXXXXX")     # → "965XXXXXXXX"
 normalize_phone("9660559123456")    # → "966559123456"  (Saudi trunk 0 stripped)
 
 # Validate a phone number: returns (is_valid, error, normalized)
-ok, error, number = validate_phone_input("+96598765432")
-# → (True, None, "96598765432")
+ok, error, number = validate_phone_input("+965XXXXXXXX")
+# → (True, None, "965XXXXXXXX")
 
 ok, error, number = validate_phone_input("user@gmail.com")
 # → (False, "'user@gmail.com' is an email address, not a phone number", "")
@@ -423,12 +423,12 @@ ok, error, number = validate_phone_input("96512345678")
 # → (False, "Invalid Kuwait mobile number: after +965 must start with 4, 5, 6, 9", "96512345678")
 
 # Find country code from a normalized number
-find_country_code("96598765432")    # → "965" (Kuwait)
+find_country_code("965XXXXXXXX")    # → "965" (Kuwait)
 find_country_code("12125551234")    # → "1"   (USA/Canada)
 find_country_code("8887654321")     # → None  (unknown)
 
 # Validate phone format against country-specific rules (length + mobile prefix)
-valid, error = validate_phone_format("96598765432")   # → (True, None)
+valid, error = validate_phone_format("965XXXXXXXX")   # → (True, None)
 valid, error = validate_phone_format("96512345678")   # → (False, "Invalid Kuwait mobile...")
 
 # Clean message text: also called automatically inside send()
@@ -449,7 +449,7 @@ All phone numbers are normalized automatically before every API call:
 4. Domestic trunk prefix stripped after country code (e.g., `9660559...` → `966559...`)
 5. Country-specific validation: checks local number length and mobile prefix for 80+ countries
 
-Numbers must include the country code (e.g., `96598765432` for Kuwait, not `98765432`).
+Numbers must include the country code (e.g., `965XXXXXXXX` for Kuwait, not `XXXXXXXX`).
 
 ### Message text
 
@@ -477,7 +477,7 @@ For a standalone cross-platform CLI, see [kwtsms-cli](https://github.com/kwtsms/
 Every API error response includes an `action` field with guidance. `send()` never raises: network failures are returned as a dict with `code="NETWORK"`.
 
 ```python
-result = sms.send("96598765432", "Your OTP for MYAPP is: 123456")
+result = sms.send("965XXXXXXXX", "Your OTP for MYAPP is: 123456")
 if result["result"] == "OK":
     save_to_db(msg_id=result["msg-id"], balance=result["balance-after"])
 else:
@@ -507,13 +507,13 @@ All formats are accepted. Numbers are normalized automatically:
 
 | Input | Sent as |
 |-------|---------|
-| `+96598765432` | `96598765432` |
-| `0096598765432` | `96598765432` |
-| `965 9876 5432` | `96598765432` |
-| `965-9876-5432` | `96598765432` |
-| `٩٦٥٩٨٧٦٥٤٣٢` (Arabic digits) | `96598765432` |
+| `+965XXXXXXXX` | `965XXXXXXXX` |
+| `00965XXXXXXXX` | `965XXXXXXXX` |
+| `965 XXXX XXXX` | `965XXXXXXXX` |
+| `965-XXXX-XXXX` | `965XXXXXXXX` |
+| `٩٦٥XXXXXXXX` (Arabic digits) | `965XXXXXXXX` |
 
-Numbers must include the country code. `98765432` (local) will be rejected by the API. Use `96598765432`.
+Numbers must include the country code. `XXXXXXXX` (local) will be rejected by the API. Use `965XXXXXXXX`.
 
 ---
 
@@ -523,7 +523,7 @@ Set `KWTSMS_TEST_MODE=1` or `test_mode=True`. Test messages are queued but **not
 
 ```python
 sms = KwtSMS.from_env()   # KWTSMS_TEST_MODE=1 in .env
-result = sms.send("96598765432", "Test message")
+result = sms.send("965XXXXXXXX", "Test message")
 # Message is queued: visible in kwtsms.com → Account → Queue
 # Delete it from the queue to recover credits
 ```
@@ -643,7 +643,7 @@ Before going live, make sure:
 One JSON line per API call written to `kwtsms.log` (or the path in `KWTSMS_LOG_FILE`). Password is always masked.
 
 ```json
-{"ts":"2026-03-04T10:00:00+00:00","endpoint":"send","request":{"username":"python_username","password":"***","sender":"MYAPP","mobile":"96598765432","message":"Your OTP is: 123456","test":"0"},"response":{"result":"OK","msg-id":"f4c841ad...","numbers":1,"points-charged":1,"balance-after":149,"unix-timestamp":1741082400},"ok":true,"error":null}
+{"ts":"2026-03-04T10:00:00+00:00","endpoint":"send","request":{"username":"python_username","password":"***","sender":"MYAPP","mobile":"965XXXXXXXX","message":"Your OTP is: 123456","test":"0"},"response":{"result":"OK","msg-id":"f4c841ad...","numbers":1,"points-charged":1,"balance-after":149,"unix-timestamp":1741082400},"ok":true,"error":null}
 ```
 
 > `ts` is always **UTC**. `unix-timestamp` inside `response` is **GMT+3** (Asia/Kuwait server time).

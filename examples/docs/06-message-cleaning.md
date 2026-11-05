@@ -96,7 +96,7 @@ If the entire message is stripped to empty, `send()` returns ERR009 locally
 without making an API call:
 
 ```python
-result = sms.send("96598765432", "👋 🎉 🔥")
+result = sms.send("965XXXXXXXX", "👋 🎉 🔥")
 # {
 #     "result":      "ERROR",
 #     "code":        "ERR009",

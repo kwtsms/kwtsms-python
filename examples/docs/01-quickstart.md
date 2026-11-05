@@ -64,16 +64,16 @@ Call `verify()` at startup in production to detect:
 ### Step 3: Send a single SMS
 
 ```python
-result = sms.send("96598765432", "Hello from kwtSMS!")
+result = sms.send("965XXXXXXXX", "Hello from kwtSMS!")
 ```
 
 Phone numbers are normalized automatically:
 
 | Input | Normalized |
 |-------|-----------|
-| `+96598765432` | `96598765432` |
-| `0096598765432` | `96598765432` |
-| `٩٦٥٩٨٧٦٥٤٣٢` | `96598765432` |
+| `+965XXXXXXXX` | `965XXXXXXXX` |
+| `00965XXXXXXXX` | `965XXXXXXXX` |
+| `٩٦٥XXXXXXXX` | `965XXXXXXXX` |
 
 **Success response fields:**
 

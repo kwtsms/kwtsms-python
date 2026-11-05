@@ -69,7 +69,7 @@ Usage in any view or task:
 ```python
 from your_app.services.sms import sms
 
-result = sms.send("96598765432", "Your order is ready.")
+result = sms.send("965XXXXXXXX", "Your order is ready.")
 ```
 
 ---
@@ -190,7 +190,7 @@ Usage:
 
 ```bash
 python manage.py send_sms --verify
-python manage.py send_sms --phone 96598765432 --message "Hello"
+python manage.py send_sms --phone 965XXXXXXXX --message "Hello"
 ```
 
 ---
