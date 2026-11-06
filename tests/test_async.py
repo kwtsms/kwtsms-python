@@ -1,6 +1,9 @@
-import pytest
+import threading
 from unittest.mock import AsyncMock, patch
-from kwtsms import AsyncKwtSMS
+
+import pytest
+
+from kwtsms import AsyncKwtSMS, _async
 # 2026-11-05 07:08 +03: tests that send take the num fixture (KWTSMS_TEST_NUMBER, conftest.py) and skip
 # when it is unset; no phone number is written here (int-testnumber).
 
@@ -62,3 +65,19 @@ class TestAsyncKwtSMS:
         result = await _async_client().send(numbers, "Hello")
         assert result["result"] == "ERROR"
         assert result["code"] == "ERR007"
+
+
+# 2026-11-07 01:56 +03: the async log write must leave the event loop thread (task py-async-log-blocking).
+@pytest.mark.asyncio
+async def test_async_log_write_runs_off_the_event_loop_thread(tmp_path):
+    seen = []
+    with patch.object(_async, "_write_log", side_effect=lambda f, e: seen.append(threading.get_ident())):
+        await _async._awrite_log(str(tmp_path / "k.log"), {"x": 1})
+    assert seen and seen[0] != threading.get_ident()
+
+
+@pytest.mark.asyncio
+async def test_async_log_write_skipped_when_logging_off():
+    with patch.object(_async, "_write_log") as w:
+        await _async._awrite_log("", {"x": 1})
+    w.assert_not_called()

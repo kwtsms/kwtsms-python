@@ -9,6 +9,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Fixed
+
+- AsyncKwtSMS writes its request log in a worker thread, so logging no longer blocks the event loop (Home Assistant
+  reported it as a blocking call). Nothing changes when logging is off.
+
 ## [0.8.0] - 2026-11-06
 
 ### Added

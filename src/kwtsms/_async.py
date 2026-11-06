@@ -14,6 +14,7 @@ Quick start:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from datetime import datetime, timezone
@@ -37,6 +38,14 @@ except ImportError:
 
 
 # 2026-11-05 14:14 +03: user_agent parameter added, sent on every call (#939).
+async def _awrite_log(log_file: str, entry: dict) -> None:
+    # 2026-11-07 01:55 +03: write the JSONL log in a worker thread: a plain open() inside the event loop blocks it
+    # (Home Assistant flags it as a blocking call). No thread at all when logging is off. Task py-async-log-blocking.
+    if not log_file:
+        return
+    await asyncio.get_running_loop().run_in_executor(None, _write_log, log_file, entry)
+
+
 async def _async_request(endpoint: str, payload: dict, log_file: str = "",
                          user_agent: str = "") -> dict:
     """Async POST to a kwtSMS endpoint. Raises RuntimeError on network or JSON failure."""
@@ -65,15 +74,15 @@ async def _async_request(endpoint: str, payload: dict, log_file: str = "",
                     data = json.loads(text)
                 except json.JSONDecodeError as exc:
                     log_entry["error"] = f"Invalid JSON response: {exc}"
-                    _write_log(log_file, log_entry)
+                    await _awrite_log(log_file, log_entry)
                     raise RuntimeError(f"Invalid JSON response: {exc}") from exc
                 log_entry["response"] = data
                 log_entry["ok"] = data.get("result") == "OK"
-                _write_log(log_file, log_entry)
+                await _awrite_log(log_file, log_entry)
                 return data
     except aiohttp.ClientError as exc:
         log_entry["error"] = f"Network error: {exc}"
-        _write_log(log_file, log_entry)
+        await _awrite_log(log_file, log_entry)
         raise RuntimeError(f"Network error: {exc}") from exc
 
 
