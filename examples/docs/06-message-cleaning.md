@@ -36,16 +36,16 @@ Emoji ranges covered:
 
 | Range | Examples |
 |-------|---------|
-| U+1F600–U+1F64F | Emoticons (😀 😂 🤔) |
-| U+1F300–U+1F5FF | Misc symbols and pictographs (🌍 🎁 🔑) |
-| U+1F680–U+1F6FF | Transport and map (🚀 🚗 ✈️) |
-| U+1F900–U+1FAFF | Supplemental and extended (🧠 🦾 🪄) |
-| U+2600–U+26FF | Miscellaneous symbols (☀️ ⭐ ⚡) |
-| U+2700–U+27BF | Dingbats (✂️ ✉️ ✅) |
-| U+1F1E0–U+1F1FF | Regional indicators (flag emoji 🇰🇼 🇺🇸) |
+| U+1F600-U+1F64F | Emoticons (😀 😂 🤔) |
+| U+1F300-U+1F5FF | Misc symbols and pictographs (🌍 🎁 🔑) |
+| U+1F680-U+1F6FF | Transport and map (🚀 🚗 ✈️) |
+| U+1F900-U+1FAFF | Supplemental and extended (🧠 🦾 🪄) |
+| U+2600-U+26FF | Miscellaneous symbols (☀️ ⭐ ⚡) |
+| U+2700-U+27BF | Dingbats (✂️ ✉️ ✅) |
+| U+1F1E0-U+1F1FF | Regional indicators (flag emoji 🇰🇼 🇺🇸) |
 | U+20E3 | Combining enclosing keycap (1️⃣ 2️⃣) |
-| U+E0000–U+E007F | Tags block (subdivision flags 🏴󠁧󠁢󠁥󠁮󠁧󠁿) |
-| U+1F000–U+1F0FF | Mahjong tiles and playing cards (🀄 🃏) |
+| U+E0000-U+E007F | Tags block (subdivision flags 🏴󠁧󠁢󠁥󠁮󠁧󠁿) |
+| U+1F000-U+1F0FF | Mahjong tiles and playing cards (🀄 🃏) |
 
 ### HTML tags
 

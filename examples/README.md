@@ -64,7 +64,7 @@ Expected output: `Connected! Balance: X credits`
 
 - [Phone number formats](docs/reference.md#phone-number-format-reference): accepted, normalized, and rejected inputs
 - [Sender ID guide](docs/reference.md#sender-id): Promotional vs Transactional, DND, registration
-- [Error codes ERR001–ERR033](docs/reference.md#error-code-reference): descriptions and recommended actions
+- [Error codes ERR001-ERR033](docs/reference.md#error-code-reference): descriptions and recommended actions
 - [Pre-launch checklist](docs/reference.md#pre-launch-checklist): credentials, security, content, anti-abuse
 
 ---

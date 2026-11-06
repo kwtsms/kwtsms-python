@@ -83,7 +83,7 @@ Open an issue at https://github.com/kwtsms/kwtsms-python/issues with:
 4. Actual vs expected behavior
 5. JSONL log output if available (remove your password first)
 
-For suspected API bugs, include the relevant kwtSMS error code (ERR001–ERR033).
+For suspected API bugs, include the relevant kwtSMS error code (ERR001-ERR033).
 
 ---
 

@@ -236,7 +236,7 @@ class TestSenderID:
     """
     Sender ID validation: tested against the real API.
 
-    Kuwait telecoms only allow alphanumeric Latin sender IDs (A–Z, 0–9, max 11 chars).
+    Kuwait telecoms only allow alphanumeric Latin sender IDs (A-Z, 0-9, max 11 chars).
     Arabic characters, empty strings, and unknown sender IDs are rejected by the API.
     """
 

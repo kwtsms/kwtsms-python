@@ -23,7 +23,7 @@ examples = {
     "Flash sale 🔥 50% off today only!":    "Flash sale  50% off today only!",
     "Meeting confirmed ✅":                  "Meeting confirmed ",
 
-    # Keycap emojis (1️⃣ 2️⃣ etc.) — U+20E3 combining enclosing keycap
+    # Keycap emojis (1️⃣ 2️⃣ etc.): U+20E3 combining enclosing keycap
     "Step 1️⃣ open the app":                 "Step 1 open the app",
 
     # Flag emojis (regional indicators: 🇰🇼 🇺🇸)

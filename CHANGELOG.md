@@ -9,8 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-06
+
 ### Added
-- The client sends a User-Agent `kwtsms-python/<version>` (name and version only, no personal data) so kwtSMS can see which integrations are in use. An optional `app_name` argument on `KwtSMS` and `AsyncKwtSMS` puts your app's token in front, e.g. `kwtsms-wordpress/3.5.2 kwtsms-python/0.7.40`. The final value is on `client.user_agent`.
+- The client sends a User-Agent `kwtsms-python/<version>` (name and version only, no personal data) so kwtSMS can see which integrations are in use. An optional `app_name` argument on `KwtSMS` and `AsyncKwtSMS` puts your app's token in front, e.g. `kwtsms-wordpress/3.6.0 kwtsms-python/0.8.0`. The final value is on `client.user_agent`.
 
 ### Changed
 - `send_with_retry()`: ERR028 retry is now off by default (`max_retries=0`), and the wait is a new `wait_seconds` parameter (default 10) instead of a hardcoded 16 seconds. Duplicate SMS protection (ERR028) is opt-in per account and its window is configurable per account (10 seconds by default); when on, the whole request is rejected and nothing is charged.
@@ -226,9 +228,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ## [0.7.14] - 2026-03-04
 
 ### Added
-- Emoji stripping extended to cover flags (regional indicator symbols U+1F1E0–U+1F1FF),
-  keycap U+20E3 (1️⃣ 2️⃣), mahjong tiles and playing cards (U+1F000–U+1F0FF),
-  and tags block subdivision flags (U+E0000–U+E007F)
+- Emoji stripping extended to cover flags (regional indicator symbols U+1F1E0-U+1F1FF),
+  keycap U+20E3 (1️⃣ 2️⃣), mahjong tiles and playing cards (U+1F000-U+1F0FF),
+  and tags block subdivision flags (U+E0000-U+E007F)
 - ERR009 local detection: `send()` now catches emoji-only or invisible-character-only
   messages before any API call and returns ERR009 without consuming credits
 - `.env` write in `kwtsms setup` now sets file permissions to `0o600`
@@ -249,7 +251,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 - `_enrich_error()`: adds developer-friendly `action` field to all API error
-  responses (ERR001–ERR033)
+  responses (ERR001-ERR033)
 - `tests/test_api_errors.py`: comprehensive error enrichment tests
 - `tests/test_phone.py`: phone normalization and validation tests
 - `tests/test_message.py`: message cleaning tests
