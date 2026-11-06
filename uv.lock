@@ -659,7 +659,7 @@ wheels = [
 
 [[package]]
 name = "kwtsms"
-version = "0.7.32"
+version = "0.8.0"
 source = { editable = "." }
 
 [package.optional-dependencies]

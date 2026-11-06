@@ -73,20 +73,9 @@ class TestCredentials:
         assert bal is not None, "balance() returned None. Check credentials"
         assert bal >= 0
 
-    def test_wrong_username_returns_auth_error(self):
-        # verify() formats: "description → action". Code (ERR003) is not in the string
-        sms = KwtSMS(username="WRONG_python_username", password="WRONG_python_password",
-                     sender_id="KWT-SMS", test_mode=True, log_file="")
-        ok, balance, error = sms.verify()
-        assert ok is False
-        assert "Authentication error" in error, f"Expected auth error, got: {error}"
-
-    def test_wrong_password_returns_auth_error(self):
-        sms = KwtSMS(username=KWTSMS_USERNAME, password="DEFINITELY_WRONG",
-                     sender_id="KWT-SMS", test_mode=True, log_file="")
-        ok, balance, error = sms.verify()
-        assert ok is False
-        assert "Authentication error" in error, f"Expected auth error, got: {error}"
+    # 2026-11-07 00:03 +03: wrong-credential test mocked; live failed logins trip the security log (task neg-auth-tests).
+    # test_wrong_username/test_wrong_password removed: covered offline by
+    # tests/test_api_errors.py TestWrongCredentials (mocked ERR003).
 
 
 # ── Send SMS (test mode: queued, never delivered) ─────────────────────────────
@@ -360,13 +349,9 @@ class TestSenderID:
 class TestErrorQuality:
     """Verify that every error response from the real API gets enriched with 'action'."""
 
-    def test_wrong_credentials_error_has_action(self):
-        sms = KwtSMS(username="WRONG_python_username", password="WRONG_python_password",
-                     sender_id="KWT-SMS", test_mode=True, log_file="")
-        ok, _, error = sms.verify()
-        assert ok is False
-        # verify() folds action into the error string
-        assert error is not None and len(error) > 0
+    # 2026-11-07 00:03 +03: wrong-credential test mocked; live failed logins trip the security log (task neg-auth-tests).
+    # test_wrong_credentials_error_has_action removed: covered offline by
+    # tests/test_api_errors.py TestWrongCredentials.test_verify_error_contains_action_guidance.
 
     def test_invalid_input_error_has_action(self):
         result = live_client().send("abc", "Test")
