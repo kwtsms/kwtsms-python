@@ -22,9 +22,15 @@ For production, split into a blueprint module and use a proper app factory.
 
 from __future__ import annotations
 
+import os
 import secrets
 import time
 from typing import Dict
+
+
+def _one_line(value: object) -> str:
+    """Log-safe text: CR and LF removed so a value cannot forge log lines (2026-11-08 example hardening)."""
+    return str(value).replace("\r", " ").replace("\n", " ")
 
 # ── Flask application factory ────────────────────────────────────────────────
 
@@ -83,7 +89,9 @@ def create_app(config: dict = None) -> "Flask":
         ok, balance, error = get_sms().verify()
         if ok:
             return jsonify({"ok": True, "balance": balance})
-        return jsonify({"ok": False, "error": error}), 503
+        # 2026-11-08 13:38 +03: details stay in the server log, the client gets a generic message (CodeQL stack-trace-exposure)
+        app.logger.error("kwtSMS verify failed: %s", _one_line(error))
+        return jsonify({"ok": False, "error": "SMS gateway unavailable"}), 503
 
     @app.post("/otp/send")
     def otp_send():
@@ -111,7 +119,7 @@ def create_app(config: dict = None) -> "Flask":
 
         if result["result"] != "OK":
             # Log the error server-side, but never expose raw API codes to clients
-            app.logger.error("kwtSMS send failed: %s", result)
+            app.logger.error("kwtSMS send failed: %s", _one_line(result))  # 2026-11-08 13:38 +03: no newlines in logs
             return jsonify({"error": "Could not send verification code. Try again."}), 500
 
         _otp_store[phone] = {
@@ -187,11 +195,9 @@ def create_app(config: dict = None) -> "Flask":
                 "balance_after":  result.get("balance-after"),
             })
 
-        return jsonify({
-            "ok":    False,
-            "code":  result.get("code"),
-            "error": result.get("description"),
-        }), 500
+        # 2026-11-08 13:38 +03: API error details go to the server log only (CodeQL stack-trace-exposure)
+        app.logger.error("kwtSMS send failed: %s", _one_line(result))
+        return jsonify({"ok": False, "error": "Could not send the SMS. Try again."}), 500
 
     return app
 
@@ -209,4 +215,4 @@ if __name__ == "__main__":
     print("  POST /otp/send     (send OTP)")
     print("  POST /otp/verify   (verify OTP)")
     print("  POST /sms/send     (send arbitrary SMS)")
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")  # 2026-11-08 13:38 +03: never debug by default

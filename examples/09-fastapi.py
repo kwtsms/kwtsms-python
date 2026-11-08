@@ -134,7 +134,7 @@ def create_app() -> "FastAPI":
         if result["result"] != "OK":
             # Log full error server-side; never expose raw API codes to clients
             import logging
-            logging.error("kwtSMS send failed: %s", result)
+            logging.error("kwtSMS send failed: %s", str(result).replace("\r", " ").replace("\n", " "))  # 2026-11-08 13:38 +03: no newlines in logs
             raise HTTPException(status_code=500, detail="Could not send verification code. Try again.")
 
         _otp_store[phone] = {
