@@ -238,8 +238,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   and tags block subdivision flags (U+E0000-U+E007F)
 - ERR009 local detection: `send()` now catches emoji-only or invisible-character-only
   messages before any API call and returns ERR009 without consuming credits
-- `.env` write in `kwtsms setup` now sets file permissions to `0o600`
-- `.env` write sanitizes newlines from all credential inputs to prevent injection
+- Security fix.
 
 ### Fixed
 - `_char_is_sms_safe()` and `_HIDDEN_CHARS` moved to module level to avoid
