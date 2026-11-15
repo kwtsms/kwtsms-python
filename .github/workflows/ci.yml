@@ -10,8 +10,10 @@ on:
 jobs:
   test:
     # 2026-11-15 10:07 +03: ubuntu-latest (26.04) has no Python 3.8 any more; 3.8 runs on 22.04. 3.14 and 3.15 added (weekly upstream check).
-    runs-on: ${{ matrix.python-version == '3.8' && 'ubuntu-22.04' || 'ubuntu-latest' }}
+    # 2026-11-15 10:09 +03: 3.9 also missing on 26.04 (run 11-15): all end-of-life versions (3.8-3.10) run on 22.04; fail-fast off.
+    runs-on: ${{ contains(fromJSON('["3.8", "3.9", "3.10"]'), matrix.python-version) && 'ubuntu-22.04' || 'ubuntu-latest' }}
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
