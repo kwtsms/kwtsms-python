@@ -9,10 +9,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # 2026-11-15 10:07 +03: ubuntu-latest (26.04) has no Python 3.8 any more; 3.8 runs on 22.04. 3.14 and 3.15 added (weekly upstream check).
+    runs-on: ${{ matrix.python-version == '3.8' && 'ubuntu-22.04' || 'ubuntu-latest' }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
     steps:
       - uses: actions/checkout@v7
